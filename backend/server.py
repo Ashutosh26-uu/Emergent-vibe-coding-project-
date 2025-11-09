@@ -464,7 +464,7 @@ async def simulate_attack(attack_type: ThreatType, vehicle_id: str = "drone-001"
         }
     
     if threat_data:
-        await threats_collection.insert_one(threat_data)
+        result = await threats_collection.insert_one(threat_data)
         
         # Log the simulation
         await logs_collection.insert_one({
@@ -475,7 +475,16 @@ async def simulate_attack(attack_type: ThreatType, vehicle_id: str = "drone-001"
             "details": {"threat_id": threat_data["threat_id"], "vehicle_id": vehicle_id}
         })
         
-        return {"success": True, "threat": threat_data}
+        # Return without MongoDB ObjectId
+        response_data = {
+            "success": True,
+            "threat_id": threat_data["threat_id"],
+            "threat_type": threat_data["threat_type"],
+            "severity": threat_data["severity"],
+            "message": f"Attack simulation '{attack_type}' initiated successfully"
+        }
+        
+        return response_data
     
     raise HTTPException(status_code=400, detail="Invalid attack type")
 
